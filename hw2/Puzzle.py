@@ -8,8 +8,8 @@ class Puzzle:
     def __init__(self, initial: State, size:int):
         self.initial = initial #initial state
         self.size = size #size of the puzzle like nxn
-        self.goal = State(np.arange(size*size).reshape(size,size))  #goal state
-        self.path = [] #Queue
+        self.goal = State(np.arange(size*size).reshape(size,size))  #goal state 
+        self.path=[]
 
 
     def initialBoards(self):
@@ -61,6 +61,14 @@ class Puzzle:
                     frontier.put(rState)
                     
             curr=frontier.get()
+        
+        #curr is goal
+            while curr is not self.initial:
+                self.path.append(curr.getMove())
+                curr = curr.getParent()
+            return self.path
+        
+        return None
 
         
 
