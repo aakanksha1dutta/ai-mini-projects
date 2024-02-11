@@ -1,3 +1,4 @@
+from queue import PriorityQueue
 import sys, copy
 from state import *
 
@@ -8,6 +9,7 @@ class Puzzle:
         self.initial = initial #initial state
         self.size = size #size of the puzzle like nxn
         self.goal = State(np.arange(size*size).reshape(size,size))  #goal state
+        self.path = [] #Queue
 
 
     def initialBoards(self):
@@ -27,7 +29,31 @@ class Puzzle:
 
         return None
         
-            
+    def BFS(self):
+
+        if self.isGoal(self.initial):
+            return self.path
+        frontier = PriorityQueue(maxsize=100000)
+        frontier.put(self.initial)
+        reached = {self.initial: self.score}
+
+        
+        curr = frontier.get()
+        while not self.isGoal(curr):
+            up, down, left, right = self.action(curr, 'U'), self.action(curr, 'D'), self.action(curr, 'L'), self.action(curr, 'R')
+            moves = [up, down, left, right]
+
+            #rState: resulting state
+            for rState in moves:
+                if rState is not None and (curr not in dict.keys(reached) or reached[rState]>rState.getCost()):
+                    reached[rState]=rState.getCost()
+                    frontier.put(rState)
+                    
+            curr=frontier.get()
+
+        
+
+           
 
         
 
