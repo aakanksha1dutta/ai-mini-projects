@@ -8,7 +8,7 @@ class Puzzle:
         self.initial = initial #initial state
         self.size = size #size of the puzzle like nxn
         self.goal = State(np.arange(size*size).astype(str).reshape(size,size))  #goal state 
-        self.path=[]
+        self.path=[] #stores the best moves
 
 
     def initialBoards(self):

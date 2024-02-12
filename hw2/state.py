@@ -10,9 +10,11 @@ class State:
         x, y = np.where(board=='0') #keep track of where 0 is
         self.blank_x, self.blank_y = int(x), int(y)
 
+    #defining hash function for HashMap / Python Dict
     def __hash__(self) -> int:
         return hash(str(self))
 
+    #defining custom comparators for Priority Queue
     def __eq__(self, other):
         return self.cost==other.cost
     
@@ -30,7 +32,7 @@ class State:
     def __le__(self, other):
         return self.cost <= other.cost
     
-    #updates and/or get cost method
+    #updates and/or gets cost method
     def getCost(self, addBy=0):
         self.cost += addBy #adds to the cost, will be used for updating with heuristic in case of Astar
         return self.cost

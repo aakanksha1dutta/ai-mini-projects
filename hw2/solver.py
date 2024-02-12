@@ -8,7 +8,7 @@ class Solver:
         return 0
     
     def main():
-        size = sys.stdin.readline().rstrip()
+        size = sys.stdin.readline().rstrip() #remove the \n character using rstrip
         input_arr = []
         print("Taking in input....")
         print()
@@ -18,7 +18,7 @@ class Solver:
         for line in sys.stdin.readlines():
             l = line.rstrip()
             print(l)
-            input_arr.append(l.split(' '))
+            input_arr.append(l.split(' ')) #appends a row of elements
         
         print()
         print("The fastest moves to the goal is:")
