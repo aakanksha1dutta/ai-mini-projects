@@ -1,14 +1,9 @@
 from Puzzle import *
 import sys
 class Solver:
-
-    def evaluate_heuristic(x1, x2, y1, y2, heuristic=0):
-        if heuristic=='manhattan':
-            return abs(y2-y1)+abs(x2-x1)
-        return 0
     
     def main():
-        size = sys.stdin.readline().rstrip() #remove the \n character using rstrip
+        size = int(sys.stdin.readline().rstrip()) #remove the \n character using rstrip
         input_arr = []
         print("Taking in input....")
         print()
@@ -26,8 +21,8 @@ class Solver:
 
         arr = np.array(input_arr)
         initial_state = State(arr)
-        puzzle = Puzzle(initial_state, size=3)  
-        path = puzzle.BFS()
+        puzzle = Puzzle(initial_state, size=size)  
+        path = puzzle.search() #def is BFS
         while len(path)!=0:
             print(path.pop(), sep=" ")
 

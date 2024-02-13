@@ -33,9 +33,23 @@ class State:
         return self.cost <= other.cost
     
     #updates and/or gets cost method
-    def getCost(self, addBy=0):
-        self.cost += addBy #adds to the cost, will be used for updating with heuristic in case of Astar
+    '''
+    heuristic means use heuristic to count cost
+    goal_digit_pos is a HashMap of row-column values for each digit's position on the game board, represented by a numpy array.
+    if we need heuristic, we compute "manhattan heuristic" and add it to cost
+    '''
+    def getCost(self, heuristic=False, goal_digit_pos:dict={}):
+
+        manhattan = 0 #default manhattan val
+        if heuristic and len(goal_digit_pos)!=0:
+           for i in self.board.flatten().tolist():
+               x2, y2 = np.where(self.board==i)
+               x2, y2 = int(x2), int(y2)
+               manhattan+= abs(x2-goal_digit_pos[i][0]) +  abs(y2-goal_digit_pos[i][1])
+        self.cost+=manhattan
+           
         return self.cost
+        
     def getParent(self):
         return self.parent
     def getMove(self):

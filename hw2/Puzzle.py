@@ -9,6 +9,12 @@ class Puzzle:
         self.size = size #size of the puzzle like nxn
         self.goal = State(np.arange(size*size).astype(str).reshape(size,size))  #goal state 
         self.path=[] #stores the best moves
+        self.goal_digit_pos = {}
+
+        #maintain a Hashmap of Goal State's digits positions
+        for i in range(size*size):
+            x, y = np.where(self.goal.board==f"{i}")
+            self.goal_digit_pos[f"{i}"] = (int(x), int(y))
 
 
     def initialBoards(self):
@@ -41,11 +47,13 @@ class Puzzle:
 
         return None
         
-    def BFS(self):
+    def search(self, method="astar"):
 
         if self.isGoal(self.initial):
             return self.path
         frontier = PriorityQueue(maxsize=100000)
+        if method=="astar":
+            self.initial.getCost(True, self.goal_digit_pos) #calculate with heuristic if method is A-star
         frontier.put(self.initial)
         reached = {self.initial: self.initial.cost}
 
@@ -59,7 +67,10 @@ class Puzzle:
             for rState in moves:
                 if rState is not None:
                     if rState not in dict.keys(reached) or reached[rState]>rState.getCost():
-                        reached[rState]=rState.getCost()
+                        if method=="astar":
+                            reached[rState]=rState.getCost(True, self.goal_digit_pos)
+                        else:
+                            reached[rState]=rState.getCost()
                         frontier.put(rState)
                     
             curr=frontier.get()
