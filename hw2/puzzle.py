@@ -1,8 +1,10 @@
 from game import *
 import sys
-class puzzle:
+class Puzzle:
     
     def main():
+        args = sys.argv[1:]
+        method = args[0].lstrip('--')
         size = int(sys.stdin.readline().rstrip()) #remove the \n character using rstrip
         input_arr = []
         print("Taking in input....")
@@ -21,8 +23,8 @@ class puzzle:
 
         arr = np.array(input_arr)
         initial_state = State(arr)
-        game = Game(initial_state, size=size)  
-        path = game.search() #def is BFS
+        game = Game(initial_state, size=size) 
+        path = game.search(method=method)
         while len(path)!=0:
             print(path.pop(), sep=" ")
 

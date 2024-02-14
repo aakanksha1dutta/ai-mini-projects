@@ -46,8 +46,9 @@ class Game:
             return State(np.array(s_arr).reshape(self.size, self.size), level=s.level+1, parent=s, move="RIGHT")
 
         return None
-        
-    def search(self, method="astar"):
+
+    #default is astar  
+    def search(self, method):
 
         if self.isGoal(self.initial):
             return self.path
@@ -69,7 +70,7 @@ class Game:
                     if rState not in dict.keys(reached) or reached[rState]>rState.getCost():
                         if method=="astar":
                             reached[rState]=rState.getCost(True, self.goal_digit_pos)
-                        else:
+                        else: #bfs
                             reached[rState]=rState.getCost()
                         frontier.put(rState)
                     
