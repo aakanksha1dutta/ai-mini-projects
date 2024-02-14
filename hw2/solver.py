@@ -1,6 +1,6 @@
-from Puzzle import *
+from game import *
 import sys
-class Solver:
+class puzzle:
     
     def main():
         size = int(sys.stdin.readline().rstrip()) #remove the \n character using rstrip
@@ -21,8 +21,8 @@ class Solver:
 
         arr = np.array(input_arr)
         initial_state = State(arr)
-        puzzle = Puzzle(initial_state, size=size)  
-        path = puzzle.search() #def is BFS
+        game = Game(initial_state, size=size)  
+        path = game.search() #def is BFS
         while len(path)!=0:
             print(path.pop(), sep=" ")
 

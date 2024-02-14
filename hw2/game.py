@@ -2,7 +2,7 @@ from queue import PriorityQueue
 from state import *
 
 
-class Puzzle:
+class Game:
     #initialize the puzzle with initial state, size and goal state
     def __init__(self, initial: State, size:int):
         self.initial = initial #initial state
