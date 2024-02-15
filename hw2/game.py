@@ -52,11 +52,14 @@ class Game:
 
         if self.isGoal(self.initial):
             return self.path
-        frontier = PriorityQueue(maxsize=100000)
+        frontier = PriorityQueue()
         if method=="astar":
             self.initial.getCost(True, self.goal_digit_pos) #calculate with heuristic if method is A-star
         frontier.put(self.initial)
         reached = {self.initial: self.initial.cost}
+
+
+        expanded = 0 #count no of expanded nodes
 
         curr = frontier.get()
         while not self.isGoal(curr):
@@ -64,14 +67,16 @@ class Game:
             up, down, left, right = self.action(curr, 'U'), self.action(curr, 'D'), self.action(curr, 'L'), self.action(curr, 'R')
             moves = [up, down, left, right]
 
+            expanded+=1
+
             #rState: resulting state
             for rState in moves:
                 if rState is not None:
-                    if rState not in dict.keys(reached) or reached[rState]>rState.getCost():
-                        if method=="astar":
-                            reached[rState]=rState.getCost(True, self.goal_digit_pos)
-                        else: #bfs
-                            reached[rState]=rState.getCost()
+                    #if astar, update cost to add manhattan heuristic
+                    if method=="astar":
+                        rState.getCost(True, self.goal_digit_pos)
+                    if rState not in dict.keys(reached) or reached[rState]>rState.getCost():                    
+                        reached[rState]=rState.getCost()
                         frontier.put(rState)
                     
             curr=frontier.get()
