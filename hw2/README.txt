@@ -4,13 +4,18 @@ CSC242 - Project 2
 The goal of this project is to solve a sliding block puzzle, given an input of a n*n matrix and search algorithm. 
 Our project implements the BFS and A* search algorithms.
 
+
+To run the code
+    cd hw2
+    ./puzzle --astar < /u/cs242/hw2/test14_in
+
 The Manhattan heuristic was used for the A* implementation. It calculates the distance between the current 
 position of each digit on the current state and its goal state position. The distance is calculated as the 
 absolute difference in the x-coordinate and the y-coordinate of the current and goal positions. 
 These distances are then summed up for all digits of the board, which gives us the heuristic value.
 
-For smaller matrices (n = 1 to 3), both BFS and A* had similar runtime performances. However, for larger matrices 
-(like /u/cs242/hw2/test14_in) A* was almost instantneous where BFS takes much longer. 
+For puzzles with less moves, both BFS and A* had similar runtime performances. However, for puzzle with more moves
+(like /u/cs242/hw2/test14_in) A* was almost instantneous where BFS takes much longer (around 1 minute and 30 sec). 
 
 The following is a summary of each class and its function:
 puzzle.py:
