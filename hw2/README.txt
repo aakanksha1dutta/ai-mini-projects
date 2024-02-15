@@ -12,10 +12,16 @@ To run the code
 The Manhattan heuristic was used for the A* implementation. It calculates the distance between the current 
 position of each digit on the current state and its goal state position. The distance is calculated as the 
 absolute difference in the x-coordinate and the y-coordinate of the current and goal positions. 
-These distances are then summed up for all digits of the board, which gives us the heuristic value.
+These distances are then summed up for all digits of the board, which gives us the heuristic value. It is 
+also consistent because movement is confined to vertical or horizontal moves so the manhattan heuristic will
+drop by at most 1 unit, which is also the cost from one state to another. 
+h(n) - h(n') <= c(n,n',a)
+h(n) <= c(n,n',a) + h(n') 
+Therefore, manhattan heuristic is consistent and hence, it is also admissible. 
 
 For puzzles with less moves, both BFS and A* had similar runtime performances. However, for puzzle with more moves
 (like /u/cs242/hw2/test14_in) A* was almost instantneous where BFS takes much longer (around 1 minute and 30 sec). 
+For the /u/cs242/hw2/test14_in, BFS expanded through 6330 nodes while A* expanded only 54 nodes. 
 
 The following is a summary of each class and its function:
 puzzle.py:
