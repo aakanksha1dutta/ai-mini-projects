@@ -12,7 +12,7 @@ class State:
 
     #defining hash function for HashMap / Python Dict
     def __hash__(self) -> int:
-        return hash(str(self))
+        return hash(tuple(self.board.flatten().tolist()))
 
     #defining custom comparators for Priority Queue
     def __eq__(self, other):

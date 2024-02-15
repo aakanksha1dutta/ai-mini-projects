@@ -47,7 +47,6 @@ class Game:
 
         return None
 
-    #default is astar  
     def search(self, method):
 
         if self.isGoal(self.initial):
@@ -56,7 +55,7 @@ class Game:
         if method=="astar":
             self.initial.getCost(True, self.goal_digit_pos) #calculate with heuristic if method is A-star
         frontier.put(self.initial)
-        reached = {self.initial: self.initial.cost}
+        reached = {self.initial: self.initial.cost} #map board config to cost
 
 
         expanded = 0 #count no of expanded nodes
