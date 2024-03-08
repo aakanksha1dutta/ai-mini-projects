@@ -96,7 +96,6 @@ def extract(lines):
     return list(literals), clauses
 
 def allLiteralsinAssign(clause, assignment):
-    withoutsigns = []
     for lit in clause:
         if lit[0]=='~':
             if lit[1:] not in assignment:
@@ -176,7 +175,7 @@ def DPLL(clauses, literals, model,length,doUnit=True, doPure=True):
             return None
         
 
-    #if doUnit only before recursion or first iteration
+    #if doUnit and only before recursion or first iteration
     if doUnit and model=={}:
         unit_assign, updated_clauses = unit_heuristic(clauses, {})
         if unit_assign is None:
