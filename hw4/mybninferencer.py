@@ -46,9 +46,9 @@ def pos_prob(random_var, value, parsed_tables, given_random_var=None, given_val=
         for p in given_random_var:
             filter = filter & (df[p]=='true')
         if value=='true':
-            return float(df[filter][random_var])
+            return float(df[filter]['key'])
         elif value =='false':
-            return 1-float(df[filter][random_var])
+            return 1-float(df[filter]['key'])
     else:
         return 0 
 
