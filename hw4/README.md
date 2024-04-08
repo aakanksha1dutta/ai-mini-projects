@@ -15,7 +15,7 @@ Tables are: {'B': [0.001, 0.999], 'E': [0.002, 0.998], 'A': [0.95, 0.05, 0.94, 0
 
 
 ### Sample table of a variable with parents like J
-|J| A| ~A|
+|A| J| ~J|
 | -------- | ------ | ------ |
 | 'true'   | 0.9  | 0.05|
 | 'false'  | 0.1 | 0.95|
