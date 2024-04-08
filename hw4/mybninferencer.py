@@ -3,44 +3,97 @@
 #import dependencies
 import numpy as np
 import pandas as pd
+from itertools import product
+import xml.dom.minidom
+import sys
 
-vars = [] #TODO: get from parser
-child_pa = {} ##TODO: get from parser; key: child variables, value: parent variables
-e={} #dictionary of evidence variables and their values, args from commmand line
-domain = {} #TODO: get from parser
-tables = {} #TODO: get from parser
+# takes xml doc
+# returns tuple of (varnames, domains)
+# varnames is list of varnames
+# domains is dict from varname to list of values
+#TODO: copied
+def vars_and_domains(doc):
+    vars = []
+    domains = {}
+    for v in doc.getElementsByTagName("VARIABLE"):
+        varname = v.getElementsByTagName("NAME")[0].childNodes[0].nodeValue
+        vars.append(varname)
+        outcomes = v.getElementsByTagName("OUTCOME")
+        outcomes = [_.childNodes[0].nodeValue for _ in outcomes]
+        domains[varname] = outcomes
+    return vars, domains
 
 
-def parse_table(tables, parents)->dict:
+# takes xml doc
+# returns tuple of (tables,parents)
+# tables is dict from var name to list of floats
+# parents is dict from var name to list of var names
+#TODO: copied
+def tables_and_parents(doc):
+    tables = {}
+    parents = {}
+    for d in doc.getElementsByTagName("DEFINITION"):
+        f = d.getElementsByTagName("FOR")[0].childNodes[0].nodeValue
+        g = d.getElementsByTagName("GIVEN") 
+        g = [_.childNodes[0].nodeValue for _ in g]
+        if g:
+            parents[f] = g
+        else:
+            parents[f] = None
+        values = []
+        for t in d.getElementsByTagName("TABLE"):
+            for c in t.childNodes:
+                if c.nodeType == xml.dom.minidom.Node.TEXT_NODE:
+                    c = c.nodeValue.strip()
+                    for v in c.split():
+                        if v:
+                            values.append(float(v))
+        tables[f] = values
+    return tables, parents
+
+
+
+
+def parse_table(tables, parents):
     parsed_tables = {}
-    for key, vars in parents:
-        if  vars is not None:
-            negative_values = ['~'+var for var in vars]
-            #TODO: by Aabha - add the values in the dataframe
-            #TODO: by Aabha - add the finished table into parsed_tables like parsed_tables[B]=cpt 
-        else: 
-            cpt = pd.DataFrame(columns=[key, "withSelf"], index=key)
-            #TODO: by Aabha - add the values in the dataframe
-            #TODO: by Aabha - add the finished table into parsed_tables like parsed_tables[B]=cpt 
-  
+    for key, vars in parents.items():
+        if vars is not None:
+            vars_list = list(vars)
+            parents_num = len(vars)
+            combos = product([True, False], repeat=parents_num)
+            combos_list = list(combos)
+            prob_list = list(tables[key])
+            df_list = list()
+            i = 4*parents_num #num of prob values in output of A
+            j = 0
+            while j != i:
+                df_list.append(prob_list[j])
+                j += 2
 
+            df_key=pd.DataFrame(df_list)
+            cpt = pd.DataFrame(combos_list, columns=vars_list)
+            cpt['key'] = df_key
+            parsed_tables[key] = cpt
+
+        else:
+            cpt = pd.DataFrame(columns=[key, "withSelf"], index=[key])
+            table_values = tables[key]
+            for i, value in enumerate([key, "withSelf"]):
+                cpt.loc[key, value] = table_values[i]
+            parsed_tables[key] = cpt
     return parsed_tables
-
-parsed_tables = parse_table(tables, parents)
-
-
 
 def isEmpty(v):
     return len(v)==0
 
-def pos_prob(random_var, value, parsed_tables, given_random_var=None, given_val=None):
+def pos_prob(random_var, value, parsed_tables, given_random_var=None):
     
     if given_random_var is None:
         df=parsed_tables[random_var]
         filter = (df[random_var]==value)
         return float(df[filter]['withSelf'])
     
-    elif given_random_var is not None and given_val is not None:
+    elif given_random_var is not None:
         df = parsed_tables[random_var]
         filter = True
         for p in given_random_var:
@@ -52,16 +105,16 @@ def pos_prob(random_var, value, parsed_tables, given_random_var=None, given_val=
     else:
         return 0 
 
-def enumerate_all(vars, e, parsed_tables) -> int:
+def enumerate_all(vars, e, parsed_tables, parents, domains) -> int:
     if isEmpty(vars):
-        return 1   
+        return 1.0   
     Y = vars.pop()
     if Y in e.keys():
-        return (pos_prob(Y,e[Y],parsed_tables, child_pa[Y], child_pa[Y])*enumerate_all(vars, e, parsed_tables))
+        return (pos_prob(Y,e[Y],parsed_tables, parents[Y])*enumerate_all(vars, e, parsed_tables, parents))
     else:
         sum = 0
-        for y in domain[Y]:
-            sum += (pos_prob(Y,y,parsed_tables,child_pa[Y], child_pa[Y])*enumerate_all(vars, {**e,Y:y}, parsed_tables))
+        for y in domains[Y]:
+            sum += (pos_prob(Y,y,parsed_tables,parents[Y])*enumerate_all(vars, {**e,Y:y}, parsed_tables, parents))
         return sum
 
 #given a distribution, normalize it
@@ -69,14 +122,32 @@ def Normalize(dist:list):
     alpha = (1/sum(dist))
     return alpha*np.array(dist).tolist()
 
-def enumerate_ask(X, e):
+def enumerate_ask(X, e, bn):
     #distribution with X having n values in its domain will have an array of lenth n
+    (vars, domains, tables, parents) = bn
+    parsed_tables = parse_table(tables, parents)
     distribution = []
-    for i in range(len(domain[X])):
-        distribution[i]=enumerate_all(vars, {**e, X:domain[X][i]},parsed_tables)
+    for i in range(len(domains[X])):
+        distribution[i]=enumerate_all(vars, {**e, X:domains[X][i]},parsed_tables, parents, domains)
     return Normalize(distribution)
 
+if __name__=='__main__':
+    #1000 aima-alarm.xml B J true M true
+    doc = xml.dom.minidom.parse(sys.argv[2])
+    (vars,domains) = vars_and_domains(doc)
+    (tables,parents) = tables_and_parents(doc)
+    bn = (vars, domains, tables, parents)
 
+    print(bn)
+    no_of_samples = sys.argv[1]
+    X = sys.argv[3]
+    e = {sys.argv[i]:sys.argv[i+1] for i in range(4,len(sys.argv),2)}
+    print(enumerate_ask(X, e, bn))
+    
+    
+
+
+    
 
 
 
