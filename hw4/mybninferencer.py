@@ -60,7 +60,7 @@ def parse_table(tables, parents):
         if vars is not None:
             vars_list = list(vars)
             parents_num = len(vars)
-            combos = product([True, False], repeat=parents_num)
+            combos = product(['true', 'false'], repeat=parents_num)
             combos_list = list(combos)
             prob_list = list(tables[key])
             df_list = list()
@@ -70,17 +70,18 @@ def parse_table(tables, parents):
                 df_list.append(prob_list[j])
                 j += 2
 
-            df_key=pd.DataFrame(df_list)
+            df_key=pd.DataFrame(df_list, columns=[key])
             cpt = pd.DataFrame(combos_list, columns=vars_list)
-            cpt['key'] = df_key
+            cpt[key] = df_key
             parsed_tables[key] = cpt
 
         else:
-            cpt = pd.DataFrame(columns=[key, "withSelf"], index=[key])
-            table_values = tables[key]
-            for i, value in enumerate([key, "withSelf"]):
-                cpt.loc[key, value] = table_values[i]
-            parsed_tables[key] = cpt
+            combos_list = ['true', 'false']
+            cpt = pd.DataFrame(combos_list, columns=[key])
+            prob_list = list(tables[key])
+            df_key=pd.DataFrame(prob_list)
+            cpt['withself'] = df_key
+        parsed_tables[key] = cpt
     return parsed_tables
 
 def isEmpty(v):
@@ -91,7 +92,7 @@ def pos_prob(random_var, value, parsed_tables, given_random_var=None):
     if given_random_var is None:
         df=parsed_tables[random_var]
         filter = (df[random_var]==value)
-        return float(df[filter]['withSelf'])
+        return float(df[filter]['withself'])
     
     elif given_random_var is not None:
         df = parsed_tables[random_var]
@@ -99,9 +100,9 @@ def pos_prob(random_var, value, parsed_tables, given_random_var=None):
         for p in given_random_var:
             filter = filter & (df[p]=='true')
         if value=='true':
-            return float(df[filter]['key'])
+            return float(df[filter][random_var])
         elif value =='false':
-            return 1-float(df[filter]['key'])
+            return 1-float(df[filter][random_var])
     else:
         return 0 
 
@@ -110,17 +111,21 @@ def enumerate_all(vars, e, parsed_tables, parents, domains) -> int:
         return 1.0   
     Y = vars.pop()
     if Y in e.keys():
-        return (pos_prob(Y,e[Y],parsed_tables, parents[Y])*enumerate_all(vars, e, parsed_tables, parents))
+        p = pos_prob(Y,e[Y],parsed_tables, parents[Y])
+        rec = enumerate_all(vars, e, parsed_tables, parents, domains)
+        return p*rec
     else:
         sum = 0
         for y in domains[Y]:
-            sum += (pos_prob(Y,y,parsed_tables,parents[Y])*enumerate_all(vars, {**e,Y:y}, parsed_tables, parents))
+            p = pos_prob(Y,y,parsed_tables,parents[Y])
+            rec = enumerate_all(vars, {**e,Y:y}, parsed_tables, parents, domains)
+            sum += (p*rec)
         return sum
 
 #given a distribution, normalize it
 def Normalize(dist:list):
     alpha = (1/sum(dist))
-    return alpha*np.array(dist).tolist()
+    return (alpha*(np.array(dist))).tolist()
 
 def enumerate_ask(X, e, bn):
     #distribution with X having n values in its domain will have an array of lenth n
@@ -128,7 +133,7 @@ def enumerate_ask(X, e, bn):
     parsed_tables = parse_table(tables, parents)
     distribution = []
     for i in range(len(domains[X])):
-        distribution[i]=enumerate_all(vars, {**e, X:domains[X][i]},parsed_tables, parents, domains)
+        distribution.append(enumerate_all(vars, {**e, X:domains[X][i]},parsed_tables, parents, domains))
     return Normalize(distribution)
 
 if __name__=='__main__':
@@ -138,7 +143,6 @@ if __name__=='__main__':
     (tables,parents) = tables_and_parents(doc)
     bn = (vars, domains, tables, parents)
 
-    print(bn)
     no_of_samples = sys.argv[1]
     X = sys.argv[3]
     e = {sys.argv[i]:sys.argv[i+1] for i in range(4,len(sys.argv),2)}
