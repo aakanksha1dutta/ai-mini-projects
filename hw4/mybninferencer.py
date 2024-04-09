@@ -87,8 +87,8 @@ def parse_table(tables, parents):
 def isEmpty(v):
     return len(v)==0
 
-def pos_prob(random_var, value, parsed_tables, given_random_var=None):
-    
+def pos_prob(random_var, value, parsed_tables, given_random_var=None, given_val = None):
+    #print(given_random_var)
     if given_random_var is None:
         df=parsed_tables[random_var]
         filter = (df[random_var]==value)
@@ -98,7 +98,7 @@ def pos_prob(random_var, value, parsed_tables, given_random_var=None):
         df = parsed_tables[random_var]
         filter = True
         for p in given_random_var:
-            filter = filter & (df[p]=='true')
+            filter = filter & (df[p]==given_val[p])
         if value=='true':
             return float(df[filter][random_var])
         elif value =='false':
@@ -108,16 +108,27 @@ def pos_prob(random_var, value, parsed_tables, given_random_var=None):
 
 def enumerate_all(vars, e, parsed_tables, parents, domains) -> int:
     if isEmpty(vars):
-        return 1.0   
-    Y = vars.pop()
+        return 1.0 
+
+    Y = vars[0]
+    vars = vars[1:]
+
     if Y in e.keys():
-        p = pos_prob(Y,e[Y],parsed_tables, parents[Y])
+        par = parents[Y]
+        val_of_par = None
+        if par is not None:
+            val_of_par = {parent: e[parent] for parent in par}
+        p = pos_prob(Y,e[Y],parsed_tables, par,val_of_par )
         rec = enumerate_all(vars, e, parsed_tables, parents, domains)
         return p*rec
     else:
         sum = 0
         for y in domains[Y]:
-            p = pos_prob(Y,y,parsed_tables,parents[Y])
+            par = parents[Y]
+            val_of_par = None
+            if par is not None:
+                val_of_par = {parent: e[parent] for parent in par}
+            p = pos_prob(Y,y,parsed_tables,par, val_of_par)
             rec = enumerate_all(vars, {**e,Y:y}, parsed_tables, parents, domains)
             sum += (p*rec)
         return sum
