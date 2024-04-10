@@ -11,7 +11,8 @@ import sys
 # returns tuple of (varnames, domains)
 # varnames is list of varnames
 # domains is dict from varname to list of values
-#TODO: copied
+
+## Exact Inference
 def vars_and_domains(doc):
     vars = []
     domains = {}
@@ -87,6 +88,7 @@ def parse_table(tables, parents):
 def isEmpty(v):
     return len(v)==0
 
+#TODO generalize for domain
 def pos_prob(random_var, value, parsed_tables, given_random_var=None, given_val = None):
     #print(given_random_var)
     if given_random_var is None:
@@ -138,14 +140,69 @@ def Normalize(dist:list):
     alpha = (1/sum(dist))
     return (alpha*(np.array(dist))).tolist()
 
-def enumerate_ask(X, e, bn):
+def enumerate_ask(X, e, bn, parsed_tables):
     #distribution with X having n values in its domain will have an array of lenth n
     (vars, domains, tables, parents) = bn
-    parsed_tables = parse_table(tables, parents)
     distribution = []
     for i in range(len(domains[X])):
         distribution.append(enumerate_all(vars, {**e, X:domains[X][i]},parsed_tables, parents, domains))
     return Normalize(distribution)
+
+
+## Approximate Inference - Likelihood Weighting
+def weighted_sample(bn,e:dict, parsed_tables):
+    (vars, domains, tables, parents) = bn
+    w = 1
+    event_arr = [0]*len(vars)
+    event_dict = {}
+    #fix the event
+    for i in range(len(vars)):
+        
+        var = vars[i]
+        par = parents[var]
+        val_of_par = None
+        if par is not None:
+            val_of_par = {parent: event_dict[parent] for parent in par}
+
+        if var in e.keys():
+            val = e[var]
+            #fix
+            event_arr[i] = val
+            event_dict[var]=val
+            w=w*pos_prob(var, val, parsed_tables, par, val_of_par)
+        else:
+            #sample var 
+            domain = domains[var]
+            prob_vec = []
+            for d in domain:
+                prob_vec.append(pos_prob(var, d, parsed_tables, par, val_of_par))
+
+            #print("Prob vec:", prob_vec) #TODO : debug
+
+            sampled_val = np.random.choice(domain, p=prob_vec)
+            event_arr[i] = sampled_val
+            event_dict[var] = sampled_val
+    
+    return event_arr, event_dict, w
+
+def likelihood_wt(X, e , bn, parsed_tables, no_of_samples):
+    (vars, domains, tables, parents) = bn
+    W = [] #array of weights
+    W_idx = {} #keeps track of which values of X correspond to which index in W
+    for i in range(len(domains[X])):
+        W.append(0)
+        W_idx[domains[X][i]]=i
+    #actual algo
+    for j in range(no_of_samples):
+        event_arr, event_dict, w = weighted_sample(bn, e, parsed_tables)
+        val_in_event = event_dict[X]
+        idx = W_idx[val_in_event] #index where this value is found
+        W[idx]+=w
+
+    #After all weights are added
+    return Normalize(W)
+
+
 
 if __name__=='__main__':
     #1000 aima-alarm.xml B J true M true
@@ -154,12 +211,17 @@ if __name__=='__main__':
     (tables,parents) = tables_and_parents(doc)
     bn = (vars, domains, tables, parents)
 
-    no_of_samples = sys.argv[1]
+    parsed_tables = parse_table(tables, parents)
+
+    no_of_samples = int(sys.argv[1])
     X = sys.argv[3]
     e = {sys.argv[i]:sys.argv[i+1] for i in range(4,len(sys.argv),2)}
-    print(enumerate_ask(X, e, bn))
+    print("With Exact Inference: ", enumerate_ask(X, e, bn, parsed_tables))
+    print("With Approximate Inference: ", likelihood_wt(X,e,bn,parsed_tables,no_of_samples))
+
     
-    
+
+
 
 
     
