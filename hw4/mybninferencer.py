@@ -54,30 +54,39 @@ def tables_and_parents(doc):
 
 
 
-
-def parse_table(tables, parents):
+def parse_table(tables, parents, domain):
     parsed_tables = {}
     for key, vars in parents.items():
         if vars is not None:
-            vars_list = list(vars)
-            parents_num = len(vars)
-            combos = product(['true', 'false'], repeat=parents_num)
-            combos_list = list(combos)
-            prob_list = list(tables[key])
-            df_list = list()
-            i = 4*parents_num #num of prob values in output of A
-            j = 0
-            while j != i:
-                df_list.append(prob_list[j])
-                j += 2
 
-            df_key=pd.DataFrame(df_list, columns=[key])
-            cpt = pd.DataFrame(combos_list, columns=vars_list)
-            cpt[key] = df_key
+            parents_list = list(vars) #list of parents of A
+            domain_list = domain.keys() #list of total variables
+            parent_val = [] #list of lists
+
+            for par in domain_list:
+                 if par in parents_list:
+                      parent_val.append(domain.get(par)) #LIST OF LISTS
+            
+            combos = product(*parent_val)
+            combos_list = list(combos) #possible combinations
+
+            #prob_list = list(tables[key]) # values of A
+
+            cpt = pd.DataFrame(combos_list, columns=parents_list) #parents kdf  
+            i = 0
+            l = len(domain[key])
+            for d in domain[key]: #in A
+                somelist = list()
+                for j in range (i, len(tables[key]),l):
+                    somelist.append(tables[key][j])
+                cpt[d] = somelist    
+                i +=1
+            #cpt = pd.DataFrame(combos_list, columns=parents_list) #parents kdf  
+            #cpt[key] = df_var #combined df
             parsed_tables[key] = cpt
-
+            
         else:
-            combos_list = ['true', 'false']
+            combos_list = domain[key]
             cpt = pd.DataFrame(combos_list, columns=[key])
             prob_list = list(tables[key])
             df_key=pd.DataFrame(prob_list)
@@ -101,10 +110,7 @@ def pos_prob(random_var, value, parsed_tables, given_random_var=None, given_val 
         filter = True
         for p in given_random_var:
             filter = filter & (df[p]==given_val[p])
-        if value=='true':
-            return float(df[filter][random_var])
-        elif value =='false':
-            return 1-float(df[filter][random_var])
+        return float(df[filter][value])
     else:
         return 0 
 
@@ -211,7 +217,7 @@ if __name__=='__main__':
     (tables,parents) = tables_and_parents(doc)
     bn = (vars, domains, tables, parents)
 
-    parsed_tables = parse_table(tables, parents)
+    parsed_tables = parse_table(tables, parents, domains)
 
     no_of_samples = int(sys.argv[1])
     X = sys.argv[3]
