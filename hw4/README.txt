@@ -2,11 +2,11 @@ Group members: Aakanksha Dutta (adutta5@u) and Aabha Pandit (apandit@u)
 CSC242 - Project 4
 
 * How to run
-  python mybninferencer.py 100000 aima-alarm.xml B J true M true
+  python mybninferencer.py 1000 aima-alarm.xml B J true M true
   Should specify a sample size for the approximate interference.
 
 * Result
-For the above input (sample size of 100000), the output is formatted as below:
+For the input (sample size of 100000), the output is formatted as below:
     With Exact Inference:  [0.2841718353643929, 0.7158281646356071]
     With Approximate Inference:  [0.29450564762264697, 0.705494352377353]
 Where for each inference, the probability of each possible value of the query variable given the evidence is output.
@@ -28,22 +28,23 @@ At the end, the weights of those samples that are consistent with the query vari
 The helper method weighted_sample() helps us with creating random samples consistent with the evidence.
 
 * No of samples needed to approximate within 1%
-For our code, the number of samples needed is around 100000 to get probability within 1% error.
+For our code, the number of samples needed is more than 100000 to get probability within 1% error.
+The output is given above and below.
 
 * Experimentation
 For approximate inference, we experimented with the sample size. 
 
 First with sample size = 1000, we get the following output:
     With Exact Inference:  [0.2841718353643929, 0.7158281646356071]
-    With Approximate Inference:  [0.0, 1.0]
+    With Approximate Inference:  [0.3584422967595298, 0.6415577032404703]
 
 sample size = 10000
     With Exact Inference:  [0.2841718353643929, 0.7158281646356071]
-    With Approximate Inference:  [0.32234223990900696, 0.6776577600909931]
+    With Approximate Inference:  [0.2577682813174684, 0.7422317186825315]
 
 sample size = 100000
     With Exact Inference:  [0.2841718353643929, 0.7158281646356071]
     With Approximate Inference:  [0.29450564762264697, 0.705494352377353]
     
-From these results, we assume that due to the small sampler size, the weights and prosterior probability are small, so the samples are generated with more extreme probabilities and these probabilities vary each time.
+From these results, we assume that due to the small sampler size, the weights and prosterior probability are small, so the samples are generated with less accurate probabilities and these probabilities vary each time.
 As we increase sample size, the approximate inference probabilities become closer to the exact inference results.

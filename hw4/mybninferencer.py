@@ -160,7 +160,7 @@ def weighted_sample(bn,e:dict, parsed_tables):
     (vars, domains, tables, parents) = bn
     w = 1
     event_arr = [0]*len(vars)
-    event_dict = {}
+    event_dict = e.copy()
     #fix the event
     for i in range(len(vars)):
         
