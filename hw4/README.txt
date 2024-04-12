@@ -2,7 +2,7 @@ Group members: Aakanksha Dutta (adutta5@u) and Aabha Pandit (apandit@u)
 CSC242 - Project 4
 
 * How to run
-  python mybninferencer.py 1000 aima-alarm.xml B J true M true
+  mybninferencer 1000 aima-alarm.xml B J true M true
   Should specify a sample size for the approximate interference.
 
 * Result
