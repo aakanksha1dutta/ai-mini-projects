@@ -72,12 +72,12 @@ def delta_loss(w, x_n, y_n):
 
 
 #cross entropy loss
-def xent(y_prob, y):
+def xent(X, y, w):
     xent = 0
     for i in range(len(y)):
         #xent += y[i]*log10(y_prob[i])
-        xent += log10(y_prob[i])
-    return (-xent/len(y))
+        xent -= log2(prob(w, X[i], y[i]))
+    return (xent/len(y))
 
 
 def get_accuracy_and_xent(X, y, w):
@@ -100,7 +100,7 @@ def get_accuracy_and_xent(X, y, w):
     accuracy = float(correct/total)
 
     #calculate cross entropy loss
-    xent_val = xent(y_prob, y)
+    xent_val = xent(X,y,w)
 
     return accuracy, xent_val
 
@@ -120,9 +120,19 @@ def train_one_pass(X_train, y_train, X_test, y_test, w,learning_rate):
     return w
 
 def main():
+    input = sys.argv
     iterations = 10
-    learning_rate = 0.001
-    X_train, y_train, X_test, y_test, w = load('a7a.train', 'a7a.test')
+    learning_rate = 0.1
+    for k in range(len(input)):
+        if input[k]=="--lr":
+            learning_rate = float(input[k+1])
+        elif input[k]=="--iterations":
+            iterations = int(input[k+1])
+
+    train_file = input[-2]
+    test_file = input[-1]
+
+    X_train, y_train, X_test, y_test, w = load(train_file, test_file)
     for iter in range(iterations):
         w = train_one_pass(X_train, y_train, X_test, y_test, w,learning_rate)
     
