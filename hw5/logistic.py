@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import numpy as np
 from math import e, pow, log10, log2
 import sys
