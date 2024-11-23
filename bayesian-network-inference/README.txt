@@ -1,9 +1,5 @@
 Group members: Aakanksha Dutta (adutta5@u) and Aabha Pandit (apandit@u)
-CSC242 - Project 4
 
-* How to run
-./mybninferencer 1000 /u/cs242/hw4/nets/aima-alarm.xml B J true M true
-  Should specify a sample size for the approximate interference.
 
 * Result
 For the input (sample size of 100000), the output is formatted as below:
@@ -11,7 +7,7 @@ For the input (sample size of 100000), the output is formatted as below:
     With Approximate Inference:  [0.29450564762264697, 0.705494352377353]
 Where for each inference, the probability of each possible value of the query variable given the evidence is output.
     
-* Exact Interference
+* Exact Inference
 For exact inference by enumeration, we implemented the enumerate_ask() and enumerate_all() with the the psuedocode defined in the book, Stuart Russell and Peter Norvig, Artificial Intelligence, A Modern Approach, 4th ed. (2020).
 The enumerate_ask() is the driver method for the recursive function enumerate_all() which performs inference on a part of the larger function using evidence.
 

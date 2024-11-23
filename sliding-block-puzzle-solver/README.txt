@@ -1,13 +1,9 @@
 Group members: Aakanksha Dutta (adutta5@u) and Aabha Pandit (apandit@u)
-CSC242 - Project 2 
+
 
 The goal of this project is to solve a sliding block puzzle, given an input of a n*n matrix and search algorithm. 
 Our project implements the BFS and A* search algorithms.
 
-
-To run the code
-    cd hw2
-    ./puzzle --astar < /u/cs242/hw2/test14_in
 
 The Manhattan heuristic was used for the A* implementation. It calculates the distance between the current 
 position of each digit on the current state and its goal state position. The distance is calculated as the 
